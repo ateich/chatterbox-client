@@ -3,18 +3,34 @@
   <head>
     <meta charset="utf-8">
     <title>chatterbox</title>
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="styles/styles.css">
 
     <!-- dependencies -->
     <script src="bower_components/jquery/jquery.min.js"></script>
+    <script src="bower_components/underscore/underscore-min.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
     <!-- your scripts -->
     <script src="scripts/config.js"></script>
     <script src="scripts/app.js"></script>
   </head>
   <body>
-    <div id="main">
-      <h1>chatterbox</h1>
+    <div id="main" class="container">
+      <p class="user pull-right name">Logged in as: </p>
+      <h1 class="text-center">Chatterbox</h1>
       <!-- Your HTML goes here! -->
+      <div class="row">
+        <div id="roomSelect" class="col-sm-3">
+        ROOMS
+        </div>
+        <div id="chats" class="col-sm-9">
+        CHATS
+        </div>
+      </div>
     </div>
+  <script>
+    app.init();
+    app.fetch();
+  </script>
   </body>
 </html>
