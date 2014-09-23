@@ -102,7 +102,8 @@ var app = {
     //If we are currently in this room, add the message to the screen
     if (message.roomname === app.currentRoom) {
       var $user = $('<div class="username">').text(message.username);
-      var $time = $('<div class="timestamp">').text(message.createdAt);
+      var timestamp = moment(message.createdAt).fromNow();
+      var $time = $('<div class="timestamp">').text(timestamp);
       var $msg = $('<div data-name="' + message.username + '">').addClass('message well')
                   .text(message.text)
                   .append($user)
