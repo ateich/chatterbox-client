@@ -1,20 +1,24 @@
 // YOUR CODE HERE:
 var parseUrl = 'https://api.parse.com/1/classes/chatterbox/?order=-createdAt';
+var postUrl = 'https://api.parse.com/1/classes/chatterbox/';
 var app = {
   index: 0,
   server: parseUrl,
   rooms: {},
   currentRoom: 'lobby',
+  currentUser: null,
   init: function() {
     var name = window.location.search.split('username=')[1];
     var text = $('.name').text();
+    this.currentUser = name;
     $('.name').text(text +" " +name);
   },
   send: function(message) {
     $.ajax({
       type: 'POST',
-      url: parseUrl,
-      data: JSON.stringify(message)
+      url: postUrl,
+      data: JSON.stringify(message),
+      contentType: 'application/json'
     });
   },
   fetch: function() {
@@ -38,6 +42,9 @@ var app = {
     });
   },
   displayMessages: function(data, newMessages) {
+    if (data === undefined) {
+      return;
+    }
     for (var i = app.index; i < data.length; i++) {
       app.addMessage(data[i], newMessages);
     }
@@ -55,6 +62,8 @@ var app = {
         // SUPER AWESOME REGEX
         // console.log(message[key]);
         message[key] = message[key].replace(/(<([^>]+)>)/ig,"");
+        message[key] = message[key].replace('#', '');
+        // message[key] = message[key].replace(/<\/?[^>]+(>|$)/g, "");
       }
     }
 
@@ -83,6 +92,8 @@ var app = {
     }
   },
   addRoom: function(roomName) {
+    // roomName = roomName.replace('#', '');
+    roomName = roomName.replace(/[!#]/g, "");
     var $room = $('<a href="#" id="' + roomName +'">').addClass('room').text(roomName);
     $('#roomSelect').append($room);
 

@@ -101,3 +101,7 @@ form input[type=text] {
 .room {
     display: block;
 }
+
+#sendRoom {
+    height: 26px;
+}

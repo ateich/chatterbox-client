@@ -20,12 +20,22 @@
       <h1 class="text-center">Chatterbox</h1>
       <!-- Your HTML goes here! -->
       <div class="row">
-        <div id="roomSelect" class="col-sm-3">
-        ROOMS
+        <div class="col-sm-3">
+        <h3 class="text-center">Rooms</h3>
+        <input type="text" placeholder="add room" name="roomName" class="col-sm-9" id="roomName" />
+        <button type="submit" class="btn btn-primary btn-xs col-sm-3" id="sendRoom">+</button>
+        <div id="roomSelect">
+
+        </div>
+
         </div>
         <div id="chats" class="col-sm-9">
-        CHATS
+
         </div>
+      </div>
+      <div class="sendMessage">
+        <input type="text" placeholder="Type Your Message" name="userMessage" id="userMessage" />
+        <button type="submit" class="btn btn-primary submit" id="send">Send</button>
       </div>
     </div>
   <script>
@@ -34,6 +44,22 @@
     var fetchInterval = setInterval(function(){
       app.fetch()
     }, 10000);
+    $('#send').on('click', function() {
+      var msgText = $('input[name=userMessage]').val();
+      var message = {
+        username: app.currentUser,
+        text: msgText,
+        roomname: app.currentRoom
+      };
+      app.send(message);
+      $('input[name=userMessage]').val('');
+    });
+    $('#sendRoom').on('click', function() {
+      var roomName = $('input[name=roomName]').val();
+      app.addRoom(roomName);
+      $('input[name=roomName]').val('');
+      $('#' + roomName).trigger('click');
+    });
   </script>
   </body>
 </html>
