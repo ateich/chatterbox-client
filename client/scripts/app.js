@@ -14,6 +14,10 @@ var app = {
     var text = $('.name').text();
     this.currentUser = name;
     $('.name').text(text +" " +name);
+
+    //Start in lobby by default
+    this.addRoom('lobby');
+    $('#lobby').addClass('active');
   },
   send: function(message) {
     $.ajax({
@@ -30,62 +34,69 @@ var app = {
       url: parseUrl,
       success: function(data){
         data = data.results;
-        // data = data.slice(app.index);
         var totalItems = 0;
         for(var key in app.rooms){
           totalItems += app.rooms[key].length;
         }
-        if (!this.mostRecentPost || this.mostRecentPost < data[data.length-1].createdAt) {
-          app.displayMessages(data, true);
-        }
+
+        app.displayMessages(data);
       },
       error: function(data){
         console.log("ERROR: ", data);
       }
     });
   },
-  displayMessages: function(data, newMessages) {
+  displayMessages: function(data) {
     if (data === undefined) {
       return;
     }
+
+    data = data.reverse();
+
     for (var i = 0; i < data.length; i++) {
-      // console.log(this.mostRecentPost + ' vs ' + data[i].createdAt);
+      // console.log('display message check: ' , this.mostRecentPost[this.currentRoom])
       if(!this.mostRecentPost[this.currentRoom] || this.mostRecentPost[this.currentRoom] < data[i].createdAt){
-        app.addMessage(data[i], newMessages);
-        this.mostRecentPost[this.currentRoom] = data[i].createdAt;
+        app.addMessage(data[i]);
       }
     }
-    // console.log(app.index);
-    app.index = data.length - 1;
-    // console.log(app.index);
   },
   clearMessages: function() {
     $('#chats').html('');
   },
-  addMessage: function(message, newMessages) {
-    if (newMessages) {
-      if(!message.text || message.text.length < 1){
-        return;
-      }
-      for (var key in message) {
-        // SUPER AWESOME REGEX
-        // console.log(message[key]);
-        message[key] = message[key].replace(/(<([^>]+)>)/ig,"");
-      }
+  addMessage: function(message) {
+    //Check for blank message
+    if(!message.text || message.text.length < 1){
+      return;
     }
 
+    //Check for blank room
     if(message.roomname === undefined || message.roomname.length <= 1) {
       message.roomname = 'lobby';
     }
 
-    console.log('BROKE? ' + app.rooms[message.roomname]);
+    //Check if this is a new message
+    if (!this.mostRecentPost[this.currentRoom] || this.mostRecentPost[this.currentRoom] < message.createdAt) {
+      this.mostRecentPost[this.currentRoom] = message.createdAt;
+      for (var key in message) {
+        // SUPER AWESOME REGEX
+        if(message[key]){
+          message[key] = message[key].replace(/(<([^>]+)>)/ig,"");
+        }
+
+        var roomNameArray = app.rooms[message.roomname];
+        if(roomNameArray === undefined){
+          roomNameArray = new Array();
+        }
+        roomNameArray.push(message);
+      }
+    }
+
+    //Add room if it has not been used before
     if (app.rooms[message.roomname] === undefined && message.roomname.length) {
       app.addRoom(message.roomname);
     }
-    if(newMessages){
-      app.rooms[message.roomname].push(message);
-    }
-    // console.log(message);
+
+    //If we are currently in this room, add the message to the screen
     if (message.roomname === app.currentRoom) {
       var $user = $('<div class="username">').text(message.username);
       var $time = $('<div class="timestamp">').text(message.createdAt);
@@ -106,8 +117,9 @@ var app = {
       }, 800);
     }
   },
+
   addRoom: function(roomName) {
-    console.log(roomName);
+    // console.log(roomName);
     // roomName = roomName.replace('#', '');
     roomName = roomName.replace(/[!#]/g, "");
     app.rooms[roomName] = new Array();
@@ -115,6 +127,7 @@ var app = {
     var $room = $('<a href="#" id="' + roomName +'">').addClass('room list-group-item').text(roomName);
     $('#roomSelect').append($room);
 
+    //CHANGE ROOM
     $('#' + roomName).on('click', function(e) {
       e.preventDefault();
       app.clearMessages();
@@ -123,8 +136,9 @@ var app = {
       $('#roomSelect > .room').removeClass('active');
       $(this).addClass('active');
       app.currentRoom = roomName;
-      app.index = app.rooms[roomName].length;
-      app.displayMessages(app.rooms[roomName]);
+
+      app.fetch();
+      //app.displayMessages(app.rooms[roomName]);
     });
   },
   addFriend: function() {
