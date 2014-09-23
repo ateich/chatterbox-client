@@ -8,6 +8,7 @@ var app = {
   currentRoom: 'lobby',
   currentUser: null,
   mostRecentPost:{},
+  pushChatAnimation:null,
   init: function() {
     var name = window.location.search.split('username=')[1];
     var text = $('.name').text();
@@ -76,7 +77,9 @@ var app = {
     if(message.roomname === undefined || message.roomname.length <= 1) {
       message.roomname = 'lobby';
     }
-    if (message.roomname.length && !app.rooms[message.roomname]) {
+
+    console.log('BROKE? ' + app.rooms[message.roomname]);
+    if (!app.rooms[message.roomname] && app.rooms[message.roomname] !== undefined && message.roomname.length) {
       app.addRoom(message.roomname);
       app.rooms[message.roomname] = [];
     }
@@ -87,7 +90,7 @@ var app = {
     if (message.roomname === app.currentRoom) {
       var $user = $('<div class="username">').text(message.username);
       var $time = $('<div class="timestamp">').text(message.createdAt);
-      var $msg = $('<div>').addClass('message')
+      var $msg = $('<div>').addClass('message well')
                   .text(message.text)
                   .append($user)
                   .append($time);
@@ -95,12 +98,20 @@ var app = {
       $('.username').on('click', function() {
         app.addFriend();
       });
+      $('#chats').css('overflow-y', 'hidden');
+      $('.message').last().addClass('animated fadeInUpBig');
+      clearInterval(this.pushChatAnimation);
+      this.pushChatAnimation = setTimeout(function() {
+        $('#chats').css('overflow-y', 'auto');
+        $("#chats").animate({ scrollTop: $("#chats")[0].scrollHeight}, 1000);
+      }, 800);
     }
   },
   addRoom: function(roomName) {
+    console.log(roomName);
     // roomName = roomName.replace('#', '');
     roomName = roomName.replace(/[!#]/g, "");
-    var $room = $('<a href="#" id="' + roomName +'">').addClass('room').text(roomName);
+    var $room = $('<a href="#" id="' + roomName +'">').addClass('room list-group-item').text(roomName);
     $('#roomSelect').append($room);
 
     $('#' + roomName).on('click', function(e) {
@@ -108,6 +119,8 @@ var app = {
       app.clearMessages();
       // app.mostRecentMessageAdded = 0;
       var roomName = $(this).text();
+      $('#roomSelect > .room').removeClass('active');
+      $(this).addClass('active');
       app.currentRoom = roomName;
       app.index = app.rooms[roomName].length;
       app.displayMessages(app.rooms[roomName]);
