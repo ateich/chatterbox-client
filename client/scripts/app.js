@@ -37,6 +37,7 @@ var app = {
         data = data.results;
         var totalItems = 0;
         for(var key in app.rooms){
+          key = key+'';
           totalItems += app.rooms[key].length;
         }
 
@@ -80,6 +81,7 @@ var app = {
       this.mostRecentPost[this.currentRoom] = message.createdAt;
       for (var key in message) {
         // SUPER AWESOME REGEX
+        // key = "'"+key+"'";
         if(message[key]){
           message[key] = message[key].replace(/(<([^>]+)>)/ig,"");
         }
@@ -132,18 +134,19 @@ var app = {
     // console.log(roomName);
     // roomName = roomName.replace('#', '');
     roomName = roomName.replace(/[!#]/g, "");
+    roomName = roomName + '';
     app.rooms[roomName] = new Array();
 
     var $room = $('<a href="#" id="' + roomName +'">').addClass('room list-group-item').text(roomName);
     $('#roomSelect').append($room);
 
     //CHANGE ROOM
-    $('#' + roomName).on('click', function(e) {
+    $('.room').on('click', function(e) {
       app.mostRecentPost[app.currentRoom] = null;
       e.preventDefault();
       app.clearMessages();
       // app.mostRecentMessageAdded = 0;
-      var roomName = $(this).text();
+      var roomName = $(e.currentTarget).text();
       $('#roomSelect > .room').removeClass('active');
       $(this).addClass('active');
       app.currentRoom = roomName;
