@@ -7,6 +7,7 @@ var app = {
   rooms: {},
   currentRoom: 'lobby',
   currentUser: null,
+  mostRecentPost:{},
   init: function() {
     var name = window.location.search.split('username=')[1];
     var text = $('.name').text();
@@ -20,6 +21,7 @@ var app = {
       data: JSON.stringify(message),
       contentType: 'application/json'
     });
+    app.fetch();
   },
   fetch: function() {
     $.ajax({
@@ -32,7 +34,7 @@ var app = {
         for(var key in app.rooms){
           totalItems += app.rooms[key].length;
         }
-        if (totalItems < data.length) {
+        if (!this.mostRecentPost || this.mostRecentPost < data[data.length-1].createdAt) {
           app.displayMessages(data, true);
         }
       },
@@ -45,10 +47,16 @@ var app = {
     if (data === undefined) {
       return;
     }
-    for (var i = app.index; i < data.length; i++) {
-      app.addMessage(data[i], newMessages);
+    for (var i = 0; i < data.length; i++) {
+      // console.log(this.mostRecentPost + ' vs ' + data[i].createdAt);
+      if(!this.mostRecentPost[this.currentRoom] || this.mostRecentPost[this.currentRoom] < data[i].createdAt){
+        app.addMessage(data[i], newMessages);
+        this.mostRecentPost[this.currentRoom] = data[i].createdAt;
+      }
     }
+    // console.log(app.index);
     app.index = data.length - 1;
+    // console.log(app.index);
   },
   clearMessages: function() {
     $('#chats').html('');
@@ -62,8 +70,6 @@ var app = {
         // SUPER AWESOME REGEX
         // console.log(message[key]);
         message[key] = message[key].replace(/(<([^>]+)>)/ig,"");
-        message[key] = message[key].replace('#', '');
-        // message[key] = message[key].replace(/<\/?[^>]+(>|$)/g, "");
       }
     }
 
@@ -103,7 +109,7 @@ var app = {
       // app.mostRecentMessageAdded = 0;
       var roomName = $(this).text();
       app.currentRoom = roomName;
-      app.index = 0;
+      app.index = app.rooms[roomName].length;
       app.displayMessages(app.rooms[roomName]);
     });
   },

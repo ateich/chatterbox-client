@@ -43,7 +43,7 @@
     app.fetch();
     var fetchInterval = setInterval(function(){
       app.fetch()
-    }, 10000);
+    }, 3000);
     $('#send').on('click', function() {
       var msgText = $('input[name=userMessage]').val();
       var message = {
