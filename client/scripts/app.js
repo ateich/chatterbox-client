@@ -111,6 +111,9 @@ var app = {
     //If we are currently in this room, add the message to the screen
     if (message.roomname === app.currentRoom) {
       var msgHeight = 100;
+      if (message.text.length > 1000) {
+        message.text = message.text.substr(0, 1000);
+      }
       var multiplier = Math.ceil(message.text.length/335);
       msgHeight *= multiplier;
       msgHeight += 10*(multiplier-1);
