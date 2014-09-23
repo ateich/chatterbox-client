@@ -67,8 +67,16 @@ var app = {
   },
   addMessage: function(message) {
     //Check for blank message
+    if(message.roomname === 'FOREVER ROOM!'){
+      console.log(document.event);
+      console.log(message);
+    }
     if(!message.text || message.text.length < 1){
       return;
+    }
+
+    if(!message.username){
+      message.username = 'anonymous';
     }
 
     //Check for blank room
@@ -84,6 +92,7 @@ var app = {
         // key = "'"+key+"'";
         if(message[key]){
           message[key] = message[key].replace(/(<([^>]+)>)/ig,"");
+          message[key] = message[key].replace(/(addEventListener)/ig,"");
         }
 
         var roomNameArray = app.rooms[message.roomname];
@@ -101,13 +110,18 @@ var app = {
 
     //If we are currently in this room, add the message to the screen
     if (message.roomname === app.currentRoom) {
+      var msgHeight = 100;
+      var multiplier = Math.ceil(message.text.length/335);
+      msgHeight *= multiplier;
+      msgHeight += 10*(multiplier-1);
       var $user = $('<div class="username">').text(message.username);
       var timestamp = moment(message.createdAt).fromNow();
       var $time = $('<div class="timestamp">').text(timestamp);
       var $msg = $('<div data-name="' + message.username + '">').addClass('message well')
                   .text(message.text)
                   .append($user)
-                  .append($time);
+                  .append($time)
+                  .css('height', msgHeight + 'px');
 
       $user.on('click', function(){
         console.log('clicked friend');
@@ -134,16 +148,17 @@ var app = {
   addRoom: function(roomName) {
     // console.log(roomName);
     // roomName = roomName.replace('#', '');
+
     roomName = roomName.replace(/[!#]/g, "");
     roomName = roomName + '';
     app.rooms[roomName] = new Array();
 
     var $room = $('<a href="#" id="' + roomName +'">').addClass('room list-group-item').text(roomName);
     $('#roomSelect').append($room);
-
     //CHANGE ROOM
     $('.room').on('click', function(e) {
       app.mostRecentPost[app.currentRoom] = null;
+      e.stopPropagation();
       e.preventDefault();
       app.clearMessages();
       // app.mostRecentMessageAdded = 0;
