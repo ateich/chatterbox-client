@@ -139,6 +139,7 @@ var app = {
 
     //CHANGE ROOM
     $('#' + roomName).on('click', function(e) {
+      app.mostRecentPost[app.currentRoom] = null;
       e.preventDefault();
       app.clearMessages();
       // app.mostRecentMessageAdded = 0;
