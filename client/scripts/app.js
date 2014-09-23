@@ -79,9 +79,8 @@ var app = {
     }
 
     console.log('BROKE? ' + app.rooms[message.roomname]);
-    if (!app.rooms[message.roomname] && app.rooms[message.roomname] !== undefined && message.roomname.length) {
+    if (app.rooms[message.roomname] === undefined && message.roomname.length) {
       app.addRoom(message.roomname);
-      app.rooms[message.roomname] = [];
     }
     if(newMessages){
       app.rooms[message.roomname].push(message);
@@ -111,6 +110,8 @@ var app = {
     console.log(roomName);
     // roomName = roomName.replace('#', '');
     roomName = roomName.replace(/[!#]/g, "");
+    app.rooms[roomName] = new Array();
+
     var $room = $('<a href="#" id="' + roomName +'">').addClass('room list-group-item').text(roomName);
     $('#roomSelect').append($room);
 
