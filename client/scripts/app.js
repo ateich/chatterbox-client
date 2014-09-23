@@ -1,9 +1,10 @@
 // YOUR CODE HERE:
-var parseUrl = 'https://api.parse.com/1/classes/chatterbox';
+var parseUrl = 'https://api.parse.com/1/classes/chatterbox/?order=-createdAt';
 var app = {
-  mostRecentMessageAdded: 0,
+  index: 0,
   server: parseUrl,
   rooms: {},
+  currentRoom: 'lobby',
   init: function() {
     var name = window.location.search.split('username=')[1];
     var text = $('.name').text();
@@ -22,7 +23,14 @@ var app = {
       url: parseUrl,
       success: function(data){
         data = data.results;
-        app.displayMessages(data, true);
+        // data = data.slice(app.index);
+        var totalItems = 0;
+        for(var key in app.rooms){
+          totalItems += app.rooms[key].length;
+        }
+        if (totalItems < data.length) {
+          app.displayMessages(data, true);
+        }
       },
       error: function(data){
         console.log("ERROR: ", data);
@@ -30,55 +38,61 @@ var app = {
     });
   },
   displayMessages: function(data, newMessages) {
-    console.log('display messages with ', data);
-    for (var i = 0; i < data.length; i++) {
-      // var mostRecentPostAt = data[i].createdAt;
-      // if (app.mostRecentMessageAdded === 0 || app.mostRecentMessageAdded < mostRecentPostAt) {
-        app.addMessage(data[i], newMessages);
-      // }
+    for (var i = app.index; i < data.length; i++) {
+      app.addMessage(data[i], newMessages);
     }
-    if(data[data.length-1]){
-      app.mostRecentMessageAdded = data[data.length-1].createdAt;
-    }
+    app.index = data.length - 1;
   },
   clearMessages: function() {
     $('#chats').html('');
   },
   addMessage: function(message, newMessages) {
-    console.log(message);
+    if (newMessages) {
+      if(!message.text || message.text.length < 1){
+        return;
+      }
+      for (var key in message) {
+        // SUPER AWESOME REGEX
+        // console.log(message[key]);
+        message[key] = message[key].replace(/(<([^>]+)>)/ig,"");
+      }
+    }
+
     if(message.roomname === undefined || message.roomname.length <= 1) {
-      return;
+      message.roomname = 'lobby';
     }
     if (message.roomname.length && !app.rooms[message.roomname]) {
-      console.log("SHOULD ADD ROOM ", message.roomname);
       app.addRoom(message.roomname);
       app.rooms[message.roomname] = [];
     }
     if(newMessages){
       app.rooms[message.roomname].push(message);
     }
-    var $user = $('<div class="username">').text(message.username);
-    var $msg = $('<div>').addClass('message')
-                .text(message.text)
-                .append($user);
-    $('#chats').append($msg);
-    $('.username').on('click', function() {
-      app.addFriend();
-    });
+    // console.log(message);
+    if (message.roomname === app.currentRoom) {
+      var $user = $('<div class="username">').text(message.username);
+      var $time = $('<div class="timestamp">').text(message.createdAt);
+      var $msg = $('<div>').addClass('message')
+                  .text(message.text)
+                  .append($user)
+                  .append($time);
+      $('#chats').append($msg);
+      $('.username').on('click', function() {
+        app.addFriend();
+      });
+    }
   },
   addRoom: function(roomName) {
     var $room = $('<a href="#" id="' + roomName +'">').addClass('room').text(roomName);
     $('#roomSelect').append($room);
-    console.log('add room');
 
     $('#' + roomName).on('click', function(e) {
       e.preventDefault();
-      console.log('change room');
       app.clearMessages();
       // app.mostRecentMessageAdded = 0;
       var roomName = $(this).text();
-      console.log(roomName);
-      console.log(app.rooms[roomName]);
+      app.currentRoom = roomName;
+      app.index = 0;
       app.displayMessages(app.rooms[roomName]);
     });
   },

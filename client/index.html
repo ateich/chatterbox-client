@@ -31,6 +31,9 @@
   <script>
     app.init();
     app.fetch();
+    var fetchInterval = setInterval(function(){
+      app.fetch()
+    }, 10000);
   </script>
   </body>
 </html>
