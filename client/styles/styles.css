@@ -101,6 +101,10 @@ form input[type=text] {
 .roomForm {
     margin-bottom: 10px;
 }
+
+.friend{
+    font-weight: bold;
+}
 .room.list-group-item, .room.list-group-item:hover {
     display: block;
     background-color: #95a5a6;

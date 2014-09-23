@@ -9,6 +9,7 @@ var app = {
   currentUser: null,
   mostRecentPost:{},
   pushChatAnimation:null,
+  friends:{},
   init: function() {
     var name = window.location.search.split('username=')[1];
     var text = $('.name').text();
@@ -100,10 +101,19 @@ var app = {
     if (message.roomname === app.currentRoom) {
       var $user = $('<div class="username">').text(message.username);
       var $time = $('<div class="timestamp">').text(message.createdAt);
-      var $msg = $('<div>').addClass('message well')
+      var $msg = $('<div data-name="' + message.username + '">').addClass('message well')
                   .text(message.text)
                   .append($user)
                   .append($time);
+
+      $user.on('click', function(){
+        console.log('clicked friend');
+        app.friends[message.username] = true;
+        $('div').find("[data-name='" + message.username + "']").addClass('friend');
+      });
+      if(this.friends[message.username]){
+        $msg.addClass('friend');
+      }
       $('#chats').append($msg);
       $('.username').on('click', function() {
         app.addFriend();
